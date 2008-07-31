@@ -306,7 +306,7 @@ begin
   ------------------------------------------
   -- instantiate User Logic
   ------------------------------------------
-  USER_LOGIC_I : entity plbv46_2_wb_v1_00_a.user_logic
+  USER_LOGIC_I : entity plbv46_2_wb_v1_10_a.user_logic
     generic map
     (
       -- MAP USER GENERICS BELOW THIS LINE ---------------
