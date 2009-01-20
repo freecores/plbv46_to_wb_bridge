@@ -84,14 +84,14 @@ entity plbv46_2_wb is
     -- ADD USER PORTS BELOW THIS LINE ------------------
     WB_CLK_O                       : out std_logic;
     WB_RST_O                       : out std_logic;
-    WB_ADR_O                       : out std_logic_vector(31 downto 0);
-    WB_DAT_O                       : out std_logic_vector(C_WB_DBUS_SIZE-1 downto 0);
-    WB_SEL_O                       : out std_logic_vector((C_WB_DBUS_SIZE/8)-1 downto 0);
+    WB_ADR_O                       : out std_logic_vector(0 to 31);
+    WB_DAT_O                       : out std_logic_vector(0 to C_WB_DBUS_SIZE-1);
+    WB_SEL_O                       : out std_logic_vector(0 to (C_WB_DBUS_SIZE/8)-1);
     WB_CYC_O                       : out std_logic;
     WB_LOCK_O                      : out std_logic;
     WB_STB_O                       : out std_logic;
-    WB_WE_O                        : out std_logic;	
-    WB_DAT_I                       : in  std_logic_vector(C_WB_DBUS_SIZE-1 downto 0);
+    WB_WE_O                        : out std_logic;
+    WB_DAT_I                       : in  std_logic_vector(0 to C_WB_DBUS_SIZE-1);
     WB_ACK_I                       : in  std_logic;
     WB_ERR_I                       : in  std_logic;
     WB_RTY_I                       : in  std_logic;
@@ -161,7 +161,7 @@ architecture IMP of plbv46_2_wb is
   ------------------------------------------
   constant ZERO_ADDR_PAD                  : std_logic_vector(0 to 31) := (others => '0');
 
-  constant IPIF_ARD_ADDR_RANGE_ARRAY      : SLV64_ARRAY_TYPE     := 
+  constant IPIF_ARD_ADDR_RANGE_ARRAY      : SLV64_ARRAY_TYPE     :=
     (
       ZERO_ADDR_PAD & C_MEM0_BASEADDR,    -- user logic memory space 0 base address
       ZERO_ADDR_PAD & C_MEM0_HIGHADDR     -- user logic memory space 0 high address
@@ -172,7 +172,7 @@ architecture IMP of plbv46_2_wb is
   ------------------------------------------
   constant USER_NUM_MEM                   : integer              := 1;
 
-  constant IPIF_ARD_NUM_CE_ARRAY          : INTEGER_ARRAY_TYPE   := 
+  constant IPIF_ARD_NUM_CE_ARRAY          : INTEGER_ARRAY_TYPE   :=
     (
       0  => 1                             -- number of ce for user logic memory space 0 (always 1 chip enable)
     );
@@ -312,7 +312,7 @@ begin
       -- MAP USER GENERICS BELOW THIS LINE ---------------
        C_WB_DBUS_SIZE                => C_WB_DBUS_SIZE,
        C_WB_ACCESS_TIMEOUT           => C_WB_ACCESS_TIMEOUT,
-       C_WB_RETRY_TIMEOUT            => C_WB_RETRY_TIMEOUT, 
+       C_WB_RETRY_TIMEOUT            => C_WB_RETRY_TIMEOUT,
        C_WB_ACCESS_RETRIES           => C_WB_ACCESS_RETRIES,
       -- MAP USER GENERICS ABOVE THIS LINE ---------------
 
@@ -358,7 +358,7 @@ begin
   -- connect internal signals
   ------------------------------------------
   WB_LOCK_O         <= '0';
-  
+
   ipif_IP2Bus_Data <= user_IP2Bus_Data;
   ipif_IP2Bus_WrAck <= user_IP2Bus_WrAck;
   ipif_IP2Bus_RdAck <= user_IP2Bus_RdAck;

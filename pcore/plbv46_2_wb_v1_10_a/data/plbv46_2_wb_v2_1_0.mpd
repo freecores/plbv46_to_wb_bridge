@@ -87,19 +87,19 @@ PORT Sl_MIRQ = Sl_MIRQ, DIR = O, VEC = [0:(C_SPLB_NUM_MASTERS-1)], BUS = SPLB
 
 
 
-PORT WB_CLK_O   = "", DIR = O                    
-PORT WB_RST_O   = "", DIR = O                    
-PORT WB_ADR_O   = "", DIR = O, VEC = [31:0]      
-PORT WB_DAT_O   = "", DIR = O, VEC = [C_WB_DBUS_SIZE-1:0]        
-PORT WB_SEL_O   = "", DIR = O, VEC = [(C_WB_DBUS_SIZE/8)-1:0]    
-PORT WB_CYC_O   = "", DIR = O 
-PORT WB_LOCK_O  = "", DIR = O 
-PORT WB_STB_O   = "", DIR = O 
-PORT WB_WE_O    = "", DIR = O 
-PORT WB_DAT_I   = "", DIR = I, VEC = [C_WB_DBUS_SIZE-1:0]
-PORT WB_ACK_I   = "", DIR = I 
-PORT WB_ERR_I   = "", DIR = I 
-PORT WB_RTY_I   = "", DIR = I 
+PORT WB_CLK_O   = "", DIR = O
+PORT WB_RST_O   = "", DIR = O
+PORT WB_ADR_O   = "", DIR = O, VEC = [0:31]
+PORT WB_DAT_O   = "", DIR = O, VEC = [0:C_WB_DBUS_SIZE-1]
+PORT WB_SEL_O   = "", DIR = O, VEC = [0:(C_WB_DBUS_SIZE/8)-1]
+PORT WB_CYC_O   = "", DIR = O
+PORT WB_LOCK_O  = "", DIR = O
+PORT WB_STB_O   = "", DIR = O
+PORT WB_WE_O    = "", DIR = O
+PORT WB_DAT_I   = "", DIR = I, VEC = [0:C_WB_DBUS_SIZE-1]
+PORT WB_ACK_I   = "", DIR = I
+PORT WB_ERR_I   = "", DIR = I
+PORT WB_RTY_I   = "", DIR = I
 
 
 
