@@ -62,13 +62,13 @@ entity user_logic is
     -- ADD USER PORTS BELOW THIS LINE ------------------
     WB_CLK_O                       : out std_logic;
     WB_RST_O                       : out std_logic;
-    WB_ADR_O                       : out std_logic_vector(31 downto 0);
-    WB_DAT_O                       : out std_logic_vector(C_WB_DBUS_SIZE-1 downto 0);
-    WB_SEL_O                       : out std_logic_vector((C_WB_DBUS_SIZE/8)-1 downto 0);
+    WB_ADR_O                       : out std_logic_vector(0 to 31);
+    WB_DAT_O                       : out std_logic_vector(0 to C_WB_DBUS_SIZE-1);
+    WB_SEL_O                       : out std_logic_vector(0 to (C_WB_DBUS_SIZE/8)-1);
     WB_CYC_O                       : out std_logic;
     WB_STB_O                       : out std_logic;
-    WB_WE_O                        : out std_logic;	
-    WB_DAT_I                       : in  std_logic_vector(C_WB_DBUS_SIZE-1 downto 0);
+    WB_WE_O                        : out std_logic;
+    WB_DAT_I                       : in  std_logic_vector(0 to C_WB_DBUS_SIZE-1);
     WB_ACK_I                       : in  std_logic;
     WB_ERR_I                       : in  std_logic;
     WB_RTY_I                       : in  std_logic;
@@ -119,7 +119,7 @@ architecture IMP of user_logic is
   signal retry_expire   : std_logic;  -- Maximum Retries exceeded
   signal access_to      : std_logic;  -- Bus Error Detected
   signal retry_to       : std_logic;  -- Retry cycle completed
-  
+
 begin
 
   --
@@ -145,7 +145,7 @@ begin
   		elsif (retry_iter_en = '1') then
   			retry_iter <= retry_iter + 1;
   		end if;
-  		
+
   		retry_expire <= '0';
   		if (retry_iter = conv_std_logic_vector(C_WB_ACCESS_RETRIES-1,2)) then
   			retry_expire <= '1';
@@ -160,10 +160,10 @@ begin
   	if (rising_edge(Bus2IP_Clk)) then
   		if (timer_en = '0') then
   			timer_cnt <= (others => '0');
-  		else 
+  		else
   			timer_cnt <= timer_cnt + 1;
   		end if;
-  			
+
   		retry_to <= '0';
   		if (timer_cnt = conv_std_logic_vector(C_WB_RETRY_TIMEOUT-1, 8)) then
   			retry_to <= '1';
@@ -172,7 +172,7 @@ begin
   		if (timer_cnt = conv_std_logic_vector(C_WB_ACCESS_TIMEOUT-1, 8)) then
   			access_to <= '1';
   		end if;
-  			
+
   	end if;
   end process;
 
@@ -181,29 +181,33 @@ begin
   -- WB Bridge State Machine (Next State Logic)
   --
   --
+
+  IP2Bus_RdAck <= wb_rdack;
+  IP2Bus_WrAck <= wb_wrack;
+
   process(curr_st, Bus2IP_CS ,WB_RTY_I ,WB_ACK_I, retry_to, access_to) begin
-  	
+
   	next_st <= curr_st;
   	timer_en <= '0';
   	retry_iter_rst <= '0';
   	retry_iter_en <= '0';
  		WB_STB_O <= '0';
  		WB_CYC_O <= '0';
- 		IP2Bus_RdAck <= '0';
- 		IP2Bus_WrAck <= '0';
+ 		wb_rdack <= '0';
+ 		wb_wrack <= '0';
  		IP2Bus_Error <= '0';
-  	
+
   	case (curr_st) is
-  		
-  		
+
+
   		when ST_IDLE =>
   			retry_iter_rst <= '1';
   			if (Bus2IP_CS(0) = '1') then
   				next_st <= ST_ACCESS;
   			end if;
-  		
+
   		-- Access State
-  		-- Completes when we receive either a RETRY, ACK or we timeout of the transaction.  
+  		-- Completes when we receive either a RETRY, ACK or we timeout of the transaction.
   		-- Transaction timeout is setup by the user.
   		when ST_ACCESS =>
   			WB_STB_O <= '1';
@@ -216,7 +220,7 @@ begin
         elsif (access_to = '1') then
         	next_st <= ST_ERROR;
         end if;
-  	  
+
   	  -- Retry Strobe
   	  -- Simply used to reset timer and increment our retries.
   	  -- We will also check to see if we have reached out limit of retries.
@@ -227,31 +231,31 @@ begin
   	  	else
   	  	  next_st <= ST_RETRY;
   	  	end if;
-  	  	
+
   	  -- Retry
   	  -- Sit here and wait until we issues a WB Retry
   	  when ST_RETRY =>
   	  	timer_en <= '1';
   	    if (retry_to = '1') then
   	    	next_st <= ST_ACCESS;
-  	    end if;	
+  	    end if;
 
       -- Error
       -- Issue PLB Error
       when ST_ERROR =>
       	IP2Bus_Error <= '1';
-      	IP2Bus_WrAck <= not Bus2IP_RNW;
-      	IP2Bus_RdAck <= Bus2IP_RNW;
+      	wb_wrack <= not Bus2IP_RNW;
+      	wb_rdack <= Bus2IP_RNW;
     		next_st <= ST_IDLE;
-  	    	
+
   	  when ST_DONE =>
-  	  	IP2Bus_RdAck <= Bus2IP_RNW;
-  	  	IP2Bus_WrAck <= not Bus2IP_RNW;
+  	  	wb_rdack <= Bus2IP_RNW;
+  	  	wb_wrack <= not Bus2IP_RNW;
   	  	next_st <= ST_IDLE;
-  	  
-  		
+
+
   	end case;
-  	
+
   end process;
 
   --
@@ -263,7 +267,7 @@ begin
   	if (rising_edge(Bus2IP_Clk)) then
   		if (Bus2IP_Reset = '1') then
   			curr_st <= ST_IDLE;
-  		else 
+  		else
   			curr_st <= next_st;
   		end if;
   	end if;
